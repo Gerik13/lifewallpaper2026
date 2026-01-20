@@ -12,24 +12,27 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 # ================================================
-# РАЗМЕР ЭКРАНА (Xiaomi 12T)
+# ФИНАЛЬНОЕ РАЗРЕШЕНИЕ (Xiaomi 12T)
 # ================================================
+FINAL_WIDTH = 1220
+FINAL_HEIGHT = 2712
+
+# Рендерим больше для чёткости
 QUALITY_SCALE = 1.5
 
-WIDTH = int(1220 * QUALITY_SCALE)
-HEIGHT = int(2712 * QUALITY_SCALE)
-
+WIDTH = int(FINAL_WIDTH * QUALITY_SCALE)
+HEIGHT = int(FINAL_HEIGHT * QUALITY_SCALE)
 
 
 # ================================================
-# ЦВЕТА (единый источник правды)
+# ЦВЕТА
 # ================================================
-BG = "#0F1115"        # фон
-WHITE = "#FFFFFF"    # прошедшие дни / проценты
-GRAY = "#8A8A95"     # вторичный текст
-DARK = "#2A2D34"     # будущие дни
-ORANGE = "#FF9F1C"   # текущий день / текст прогресса
-RED = "#FF453A"      # выходные (только текст)
+BG = "#0F1115"
+WHITE = "#FFFFFF"
+GRAY = "#8A8A95"
+DARK = "#2A2D34"
+ORANGE = "#FF9F1C"
+RED = "#FF453A"
 
 
 # ================================================
@@ -40,11 +43,11 @@ TOTAL_DAYS = 365
 
 
 # ================================================
-# МАСШТАБ И ПОЗИЦИЯ СЕТКИ
+# МАСШТАБ И ПОЗИЦИЯ
 # ================================================
-SCALE = 1.3               # масштаб ВСЕЙ сетки
-FOOTER_SCALE = 1.5        # масштаб ТОЛЬКО прогресс-бара
-VERTICAL_SHIFT = 200       # сдвиг сетки вниз
+SCALE = 1.3
+FOOTER_SCALE = 1.5
+VERTICAL_SHIFT = int(200 * QUALITY_SCALE)
 
 
 # ================================================
@@ -55,21 +58,20 @@ draw = ImageDraw.Draw(img)
 
 
 # ================================================
-# СИСТЕМНЫЙ ШРИФТ (поддерживает кириллицу)
+# ШРИФТ
 # ================================================
 FONT_PATH = "fonts/Roboto-Regular.ttf"
 
-
-font_month = ImageFont.truetype(FONT_PATH, int(22 * SCALE))
-font_weekday = ImageFont.truetype(FONT_PATH, int(14 * SCALE))
+font_month = ImageFont.truetype(FONT_PATH, int(22 * SCALE * QUALITY_SCALE))
+font_weekday = ImageFont.truetype(FONT_PATH, int(14 * SCALE * QUALITY_SCALE))
 font_footer = ImageFont.truetype(
     FONT_PATH,
-    int(16 * SCALE * FOOTER_SCALE)
+    int(16 * SCALE * FOOTER_SCALE * QUALITY_SCALE)
 )
 
 
 # ================================================
-# ДАННЫЕ О МЕСЯЦАХ
+# ДАННЫЕ
 # ================================================
 months = [
     ("ЯНВАРЬ", 1), ("ФЕВРАЛЬ", 2), ("МАРТ", 3),
@@ -82,28 +84,28 @@ weekdays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 
 
 # ================================================
-# ПАРАМЕТРЫ РАСКЛАДКИ (умножены на SCALE)
+# РАСКЛАДКА
 # ================================================
 COLS = 3
 ROWS = 4
 
-DOT_SIZE = int(16 * SCALE)
-DOT_GAP = int(12 * SCALE)
-LINE_GAP = int(10 * SCALE)
+DOT_SIZE = int(16 * SCALE * QUALITY_SCALE)
+DOT_GAP = int(12 * SCALE * QUALITY_SCALE)
+LINE_GAP = int(10 * SCALE * QUALITY_SCALE)
 
-TITLE_HEIGHT = int(34 * SCALE)
-WEEKDAY_HEIGHT = int(18 * SCALE)
+TITLE_HEIGHT = int(34 * SCALE * QUALITY_SCALE)
+WEEKDAY_HEIGHT = int(18 * SCALE * QUALITY_SCALE)
 
-H_GAP = int(36 * SCALE)
-V_GAP = int(44 * SCALE)
+H_GAP = int(36 * SCALE * QUALITY_SCALE)
+V_GAP = int(44 * SCALE * QUALITY_SCALE)
 
 MONTH_CONTENT_WIDTH = 7 * (DOT_SIZE + DOT_GAP)
 CELL_WIDTH = MONTH_CONTENT_WIDTH
-CELL_HEIGHT = int(200 * SCALE)
+CELL_HEIGHT = int(200 * SCALE * QUALITY_SCALE)
 
 
 # ================================================
-# ВЫЧИСЛЕНИЕ ЦЕНТРА СЕТКИ
+# ЦЕНТРИРОВАНИЕ
 # ================================================
 GRID_WIDTH = COLS * CELL_WIDTH + (COLS - 1) * H_GAP
 GRID_HEIGHT = ROWS * CELL_HEIGHT + (ROWS - 1) * V_GAP
@@ -113,7 +115,7 @@ START_Y = (HEIGHT - GRID_HEIGHT) // 2 + VERTICAL_SHIFT
 
 
 # ================================================
-# ТЕКУЩАЯ ДАТА И ПРОГРЕСС ГОДА
+# ТЕКУЩАЯ ДАТА
 # ================================================
 today = date.today()
 
@@ -129,7 +131,7 @@ progress_percent = int((day_of_year / TOTAL_DAYS) * 100)
 
 
 # ================================================
-# ОТРИСОВКА МЕСЯЦЕВ
+# ОТРИСОВКА
 # ================================================
 for i, (month_name, month_num) in enumerate(months):
 
@@ -139,7 +141,7 @@ for i, (month_name, month_num) in enumerate(months):
     x0 = START_X + col * (CELL_WIDTH + H_GAP)
     y0 = START_Y + row * (CELL_HEIGHT + V_GAP)
 
-    # ---- Название месяца (по центру ячейки)
+    # Месяц
     bbox = draw.textbbox((0, 0), month_name, font=font_month)
     title_w = bbox[2] - bbox[0]
 
@@ -150,7 +152,7 @@ for i, (month_name, month_num) in enumerate(months):
         font=font_month
     )
 
-    # ---- Дни недели (СБ / ВС красные)
+    # Дни недели
     wx = x0
     wy = y0 + TITLE_HEIGHT
 
@@ -159,7 +161,7 @@ for i, (month_name, month_num) in enumerate(months):
         draw.text((wx, wy), wd, fill=color, font=font_weekday)
         wx += DOT_SIZE + DOT_GAP
 
-    # ---- Точки дней месяца
+    # Точки дней
     first_weekday, days_in_month = calendar.monthrange(YEAR, month_num)
     x = x0 + first_weekday * (DOT_SIZE + DOT_GAP)
     y = wy + WEEKDAY_HEIGHT
@@ -187,20 +189,16 @@ for i, (month_name, month_num) in enumerate(months):
         else:
             color = DARK
 
-        draw.ellipse(
-            (x, y, x + DOT_SIZE, y + DOT_SIZE),
-            fill=color
-        )
+        draw.ellipse((x, y, x + DOT_SIZE, y + DOT_SIZE), fill=color)
 
         x += DOT_SIZE + DOT_GAP
-
         if (first_weekday + day) % 7 == 0:
             x = x0
             y += DOT_SIZE + LINE_GAP
 
 
 # ================================================
-# ПРОГРЕСС-БАР (текстовый)
+# ПРОГРЕСС
 # ================================================
 text_left = f"Осталось {remaining_days} дней"
 text_right = f" · {progress_percent}%"
@@ -208,13 +206,14 @@ text_right = f" · {progress_percent}%"
 bbox_l = draw.textbbox((0, 0), text_left, font=font_footer)
 bbox_r = draw.textbbox((0, 0), text_right, font=font_footer)
 
-total_width = (bbox_l[2] - bbox_l[0]) + (bbox_r[2] - bbox_r[0])
-footer_x = (WIDTH - total_width) // 2
-footer_y = START_Y + GRID_HEIGHT + int(48 * SCALE)
+total_w = (bbox_l[2] - bbox_l[0]) + (bbox_r[2] - bbox_r[0])
 
-draw.text((footer_x, footer_y), text_left, fill=ORANGE, font=font_footer)
+fx = (WIDTH - total_w) // 2
+fy = START_Y + GRID_HEIGHT + int(48 * SCALE * QUALITY_SCALE)
+
+draw.text((fx, fy), text_left, fill=ORANGE, font=font_footer)
 draw.text(
-    (footer_x + (bbox_l[2] - bbox_l[0]), footer_y),
+    (fx + (bbox_l[2] - bbox_l[0]), fy),
     text_right,
     fill=WHITE,
     font=font_footer
@@ -222,15 +221,17 @@ draw.text(
 
 
 # ================================================
-# СОХРАНЕНИЕ ФАЙЛА
-# ================================================
-# ================================================
-# SAVE RESULT TO /output
+# ФИНАЛЬНЫЙ DOWNSCALE + SAVE (КЛЮЧЕВОЙ МОМЕНТ)
 # ================================================
 output_dir = "output"
 os.makedirs(output_dir, exist_ok=True)
 
-output = os.path.join(output_dir, "wallpaper.png")
-img.save(output)
+final_img = img.resize(
+    (FINAL_WIDTH, FINAL_HEIGHT),
+    resample=Image.LANCZOS
+)
 
-print("Готово:", output)
+output_path = os.path.join(output_dir, "wallpaper.png")
+final_img.save(output_path, optimize=False)
+
+print("Готово:", output_path)
