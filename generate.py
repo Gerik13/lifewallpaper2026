@@ -169,7 +169,7 @@ for i, (month_name, month_num) in enumerate(months):
     wy = int(y0 + TITLE_HEIGHT)
 
     for idx, wd in enumerate(weekdays):
-        color = RED if idx >= 5 else GRAY
+        color = RED if idx >= 5 else WHITE
         draw_text_crisp(
             draw,
             (wx, wy),
