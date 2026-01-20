@@ -219,7 +219,13 @@ draw.text(
 # ================================================
 # СОХРАНЕНИЕ ФАЙЛА
 # ================================================
-output = os.path.join(os.getcwd(), "wallpaper_xiaomi_12t.png")
+# ================================================
+# SAVE RESULT TO /output
+# ================================================
+output_dir = "output"
+os.makedirs(output_dir, exist_ok=True)
+
+output = os.path.join(output_dir, "wallpaper.png")
 img.save(output)
 
 print("Готово:", output)
