@@ -53,7 +53,8 @@ draw = ImageDraw.Draw(img)
 # ================================================
 # СИСТЕМНЫЙ ШРИФТ (поддерживает кириллицу)
 # ================================================
-FONT_PATH = "C:/Windows/Fonts/arial.ttf"
+FONT_PATH = "fonts/Roboto-Regular.ttf"
+
 
 font_month = ImageFont.truetype(FONT_PATH, int(22 * SCALE))
 font_weekday = ImageFont.truetype(FONT_PATH, int(13 * SCALE))
