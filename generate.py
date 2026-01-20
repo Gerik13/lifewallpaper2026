@@ -101,7 +101,7 @@ weekdays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 COLS = 3
 ROWS = 4
 
-DOT_SIZE = int(16 * SCALE * QUALITY_SCALE)
+DOT_SIZE = int(14 * SCALE * QUALITY_SCALE)
 DOT_GAP = int(12 * SCALE * QUALITY_SCALE)
 LINE_GAP = int(10 * SCALE * QUALITY_SCALE)
 
