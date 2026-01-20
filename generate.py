@@ -1,90 +1,123 @@
-# ================================================
-# Импорт стандартных библиотек
-# ================================================
+# =================================================
+# Импорт стандартных библиотек Python
+# =================================================
+# date       — чтобы узнать текущую дату
+# calendar   — чтобы корректно строить месяцы и дни недели
+# os         — для работы с папками и путями
 from datetime import date
 import calendar
 import os
 
-# ================================================
-# Импорт PIL
-# ================================================
+# =================================================
+# Импорт PIL (Pillow) для работы с изображениями
+# =================================================
+# Image      — создание изображения
+# ImageDraw  — рисование текста и фигур
+# ImageFont  — загрузка и использование шрифтов
 from PIL import Image, ImageDraw, ImageFont
 
 
-# ================================================
-# ФУНКЦИЯ ДЛЯ МАКСИМАЛЬНОЙ ЧЁТКОСТИ ТЕКСТА
-# ================================================
+# =================================================
+# ФУНКЦИЯ: ЧЁТКАЯ ОТРИСОВКА МЕЛКОГО ТЕКСТА
+# =================================================
+# Используется ТОЛЬКО для дней недели (ПН ВТ СР…)
+#
+# Идея:
+# 1. Текст рисуется 4 раза фоном (вокруг)
+# 2. Потом основной текст сверху
+# Это создаёт эффект лёгкого hinting и делает
+# текст визуально резче на Android lock screen
 def draw_text_crisp(draw, pos, text, font, fill, bg):
-    x, y = int(pos[0]), int(pos[1])
-    # псевдо-hinting (микрообводка)
-    draw.text((x-1, y), text, font=font, fill=bg)
-    draw.text((x+1, y), text, font=font, fill=bg)
-    draw.text((x, y-1), text, font=font, fill=bg)
-    draw.text((x, y+1), text, font=font, fill=bg)
+    x, y = int(pos[0]), int(pos[1])  # важно: целые пиксели
+
+    # микрообводка фоновым цветом
+    draw.text((x - 1, y), text, font=font, fill=bg)
+    draw.text((x + 1, y), text, font=font, fill=bg)
+    draw.text((x, y - 1), text, font=font, fill=bg)
+    draw.text((x, y + 1), text, font=font, fill=bg)
+
+    # основной текст
     draw.text((x, y), text, font=font, fill=fill)
 
 
-# ================================================
-# ФИНАЛЬНОЕ РАЗРЕШЕНИЕ (Xiaomi 12T)
-# ================================================
+# =================================================
+# ФИНАЛЬНОЕ РАЗРЕШЕНИЕ УСТРОЙСТВА
+# =================================================
+# Это РЕАЛЬНОЕ разрешение экрана блокировки
 FINAL_WIDTH = 1220
 FINAL_HEIGHT = 2712
 
+# Рисуем картинку больше, чем экран,
+# чтобы потом качественно уменьшить (anti-aliasing)
 QUALITY_SCALE = 1.5
 
 WIDTH = int(FINAL_WIDTH * QUALITY_SCALE)
 HEIGHT = int(FINAL_HEIGHT * QUALITY_SCALE)
 
 
-# ================================================
-# ЦВЕТА
-# ================================================
-BG = "#000000"
-WHITE = "#FFFFFF"
-GRAY = "#8A8A95"
-DARK = "#2A2D34"
-ORANGE = "#FF9F1C"
-RED = "#FF453A"
+# =================================================
+# ЦВЕТОВАЯ ПАЛИТРА
+# =================================================
+# Здесь можно менять дизайн, не лезя в логику
+BG = "#000000"        # фон
+WHITE = "#FFFFFF"    # прошедшие дни, основной текст
+GRAY = "#8A8A95"     # вторичный текст
+DARK = "#2A2D34"     # будущие дни
+ORANGE = "#FF9F1C"   # текущий день и текст прогресса
+RED = "#FF453A"      # выходные (только буквы)
 
 
-# ================================================
-# КАЛЕНДАРЬ
-# ================================================
-YEAR = 2026
-TOTAL_DAYS = 365
+# =================================================
+# НАСТРОЙКА КАЛЕНДАРЯ
+# =================================================
+YEAR = 2026           # год, который визуализируем
+TOTAL_DAYS = 365      # для расчёта прогресса
 
 
-# ================================================
-# МАСШТАБ
-# ================================================
-SCALE = 1.3
-FOOTER_SCALE = 1.5
-VERTICAL_SHIFT = int(210 * QUALITY_SCALE)
+# =================================================
+# ОБЩИЙ МАСШТАБ И ПОЗИЦИЯ СЕТКИ
+# =================================================
+SCALE = 1.3            # масштаб всей календарной сетки
+FOOTER_SCALE = 1.5     # дополнительный масштаб прогресса
+VERTICAL_SHIFT = int(210 * QUALITY_SCALE)  # сдвиг вниз
 
 
-# ================================================
-# ХОЛСТ
-# ================================================
+# =================================================
+# СОЗДАНИЕ ХОЛСТА
+# =================================================
+# Создаём изображение увеличенного размера
 img = Image.new("RGB", (WIDTH, HEIGHT), BG)
 draw = ImageDraw.Draw(img)
 
 
-# ================================================
-# ШРИФТ
-# ================================================
+# =================================================
+# ШРИФТЫ
+# =================================================
+# Используем локальный шрифт, чтобы:
+# — одинаково работало локально и на GitHub
+# — не зависеть от ОС
 FONT_PATH = "fonts/Roboto-Regular.ttf"
 
-font_month = ImageFont.truetype(FONT_PATH, int(22 * SCALE * QUALITY_SCALE))
-font_weekday = ImageFont.truetype(FONT_PATH, int(14 * SCALE * QUALITY_SCALE))
+font_month = ImageFont.truetype(
+    FONT_PATH,
+    int(22 * SCALE * QUALITY_SCALE)
+)
+
+font_weekday = ImageFont.truetype(
+    FONT_PATH,
+    int(14 * SCALE * QUALITY_SCALE)
+)
+
 font_footer = ImageFont.truetype(
     FONT_PATH,
     int(16 * SCALE * FOOTER_SCALE * QUALITY_SCALE)
 )
 
 
-# ================================================
-# ДАННЫЕ
-# ================================================
+# =================================================
+# ДАННЫЕ МЕСЯЦЕВ И ДНЕЙ НЕДЕЛИ
+# =================================================
+# Названия месяцев + номер месяца
 months = [
     ("ЯНВАРЬ", 1), ("ФЕВРАЛЬ", 2), ("МАРТ", 3),
     ("АПРЕЛЬ", 4), ("МАЙ", 5), ("ИЮНЬ", 6),
@@ -92,33 +125,34 @@ months = [
     ("ОКТЯБРЬ", 10), ("НОЯБРЬ", 11), ("ДЕКАБРЬ", 12),
 ]
 
+# Порядок ВАЖЕН: calendar.monthrange использует ПН первым
 weekdays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 
 
-# ================================================
-# РАСКЛАДКА
-# ================================================
-COLS = 3
-ROWS = 4
+# =================================================
+# ПАРАМЕТРЫ СЕТКИ
+# =================================================
+COLS = 3   # колонок месяцев
+ROWS = 4   # строк месяцев
 
-DOT_SIZE = int(14 * SCALE * QUALITY_SCALE)
-DOT_GAP = int(12 * SCALE * QUALITY_SCALE)
-LINE_GAP = int(10 * SCALE * QUALITY_SCALE)
+DOT_SIZE = int(14 * SCALE * QUALITY_SCALE)   # размер точки дня
+DOT_GAP = int(12 * SCALE * QUALITY_SCALE)    # расстояние между точками
+LINE_GAP = int(10 * SCALE * QUALITY_SCALE)   # расстояние между неделями
 
-TITLE_HEIGHT = int(34 * SCALE * QUALITY_SCALE)
-WEEKDAY_HEIGHT = int(18 * SCALE * QUALITY_SCALE)
+TITLE_HEIGHT = int(34 * SCALE * QUALITY_SCALE)    # высота заголовка месяца
+WEEKDAY_HEIGHT = int(18 * SCALE * QUALITY_SCALE)  # высота строки дней недели
 
-H_GAP = int(36 * SCALE * QUALITY_SCALE)
-V_GAP = int(44 * SCALE * QUALITY_SCALE)
+H_GAP = int(36 * SCALE * QUALITY_SCALE)  # горизонтальный отступ между месяцами
+V_GAP = int(44 * SCALE * QUALITY_SCALE)  # вертикальный отступ между месяцами
 
 MONTH_CONTENT_WIDTH = 7 * (DOT_SIZE + DOT_GAP)
 CELL_WIDTH = MONTH_CONTENT_WIDTH
 CELL_HEIGHT = int(200 * SCALE * QUALITY_SCALE)
 
 
-# ================================================
-# ЦЕНТРИРОВАНИЕ
-# ================================================
+# =================================================
+# ЦЕНТРИРОВАНИЕ ВСЕЙ СЕТКИ
+# =================================================
 GRID_WIDTH = COLS * CELL_WIDTH + (COLS - 1) * H_GAP
 GRID_HEIGHT = ROWS * CELL_HEIGHT + (ROWS - 1) * V_GAP
 
@@ -126,11 +160,12 @@ START_X = int((WIDTH - GRID_WIDTH) // 2)
 START_Y = int((HEIGHT - GRID_HEIGHT) // 2 + VERTICAL_SHIFT)
 
 
-# ================================================
-# ДАТА И ПРОГРЕСС
-# ================================================
+# =================================================
+# ТЕКУЩАЯ ДАТА И ПРОГРЕСС ГОДА
+# =================================================
 today = date.today()
 
+# Определяем, сколько дней прошло в году
 if today.year < YEAR:
     day_of_year = 0
 elif today.year > YEAR:
@@ -142,18 +177,19 @@ remaining_days = TOTAL_DAYS - day_of_year
 progress_percent = int((day_of_year / TOTAL_DAYS) * 100)
 
 
-# ================================================
-# ОТРИСОВКА
-# ================================================
+# =================================================
+# ОТРИСОВКА КАЛЕНДАРЯ
+# =================================================
 for i, (month_name, month_num) in enumerate(months):
 
+    # определяем позицию месяца в сетке
     col = i % COLS
     row = i // COLS
 
     x0 = int(START_X + col * (CELL_WIDTH + H_GAP))
     y0 = int(START_Y + row * (CELL_HEIGHT + V_GAP))
 
-    # Название месяца
+    # ---------- Название месяца ----------
     bbox = draw.textbbox((0, 0), month_name, font=font_month)
     title_w = bbox[2] - bbox[0]
 
@@ -164,23 +200,16 @@ for i, (month_name, month_num) in enumerate(months):
         font=font_month
     )
 
-    # Дни недели (ЧЁТКИЕ)
+    # ---------- Дни недели ----------
     wx = int(x0)
     wy = int(y0 + TITLE_HEIGHT)
 
     for idx, wd in enumerate(weekdays):
         color = RED if idx >= 5 else WHITE
-        draw_text_crisp(
-            draw,
-            (wx, wy),
-            wd,
-            font_weekday,
-            fill=color,
-            bg=BG
-        )
+        draw_text_crisp(draw, (wx, wy), wd, font_weekday, color, BG)
         wx += DOT_SIZE + DOT_GAP
 
-    # Точки дней
+    # ---------- Точки дней ----------
     first_weekday, days_in_month = calendar.monthrange(YEAR, month_num)
     x = int(x0 + first_weekday * (DOT_SIZE + DOT_GAP))
     y = int(wy + WEEKDAY_HEIGHT)
@@ -216,9 +245,9 @@ for i, (month_name, month_num) in enumerate(months):
             y += DOT_SIZE + LINE_GAP
 
 
-# ================================================
-# ПРОГРЕСС
-# ================================================
+# =================================================
+# ПРОГРЕСС ГОДА (НИЗ ЭКРАНА)
+# =================================================
 text_left = f"Осталось {remaining_days} дней"
 text_right = f" · {progress_percent}%"
 
@@ -234,16 +263,19 @@ draw.text((fx, fy), text_left, fill=ORANGE, font=font_footer)
 draw.text((fx + (bbox_l[2] - bbox_l[0]), fy), text_right, fill=WHITE, font=font_footer)
 
 
-# ================================================
-# ФИНАЛЬНЫЙ DOWNSCALE + SAVE
-# ================================================
-output_dir = "output"
-os.makedirs(output_dir, exist_ok=True)
-
+# =================================================
+# ФИНАЛЬНЫЙ DOWNSCALE + СОХРАНЕНИЕ
+# =================================================
+# Уменьшаем изображение до реального размера экрана
+# с качественным фильтром (ключ к чёткости)
 final_img = img.resize(
     (FINAL_WIDTH, FINAL_HEIGHT),
     resample=Image.LANCZOS
 )
+
+# Гарантируем наличие папки
+output_dir = "output"
+os.makedirs(output_dir, exist_ok=True)
 
 output_path = os.path.join(output_dir, "wallpaper.png")
 final_img.save(output_path, optimize=False)
