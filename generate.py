@@ -14,7 +14,11 @@ from PIL import Image, ImageDraw, ImageFont
 # ================================================
 # РАЗМЕР ЭКРАНА (Xiaomi 12T)
 # ================================================
-WIDTH, HEIGHT = 1220, 2712
+QUALITY_SCALE = 1.5
+
+WIDTH = int(1220 * QUALITY_SCALE)
+HEIGHT = int(2712 * QUALITY_SCALE)
+
 
 
 # ================================================
@@ -57,7 +61,7 @@ FONT_PATH = "fonts/Roboto-Regular.ttf"
 
 
 font_month = ImageFont.truetype(FONT_PATH, int(22 * SCALE))
-font_weekday = ImageFont.truetype(FONT_PATH, int(13 * SCALE))
+font_weekday = ImageFont.truetype(FONT_PATH, int(14 * SCALE))
 font_footer = ImageFont.truetype(
     FONT_PATH,
     int(16 * SCALE * FOOTER_SCALE)
