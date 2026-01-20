@@ -6,9 +6,22 @@ import calendar
 import os
 
 # ================================================
-# Импорт библиотеки для работы с изображениями
+# Импорт PIL
 # ================================================
 from PIL import Image, ImageDraw, ImageFont
+
+
+# ================================================
+# ФУНКЦИЯ ДЛЯ МАКСИМАЛЬНОЙ ЧЁТКОСТИ ТЕКСТА
+# ================================================
+def draw_text_crisp(draw, pos, text, font, fill, bg):
+    x, y = int(pos[0]), int(pos[1])
+    # псевдо-hinting (микрообводка)
+    draw.text((x-1, y), text, font=font, fill=bg)
+    draw.text((x+1, y), text, font=font, fill=bg)
+    draw.text((x, y-1), text, font=font, fill=bg)
+    draw.text((x, y+1), text, font=font, fill=bg)
+    draw.text((x, y), text, font=font, fill=fill)
 
 
 # ================================================
@@ -17,7 +30,6 @@ from PIL import Image, ImageDraw, ImageFont
 FINAL_WIDTH = 1220
 FINAL_HEIGHT = 2712
 
-# Рендерим больше для чёткости
 QUALITY_SCALE = 1.5
 
 WIDTH = int(FINAL_WIDTH * QUALITY_SCALE)
@@ -36,14 +48,14 @@ RED = "#FF453A"
 
 
 # ================================================
-# КАЛЕНДАРНЫЙ ГОД
+# КАЛЕНДАРЬ
 # ================================================
 YEAR = 2026
 TOTAL_DAYS = 365
 
 
 # ================================================
-# МАСШТАБ И ПОЗИЦИЯ
+# МАСШТАБ
 # ================================================
 SCALE = 1.3
 FOOTER_SCALE = 1.5
@@ -51,7 +63,7 @@ VERTICAL_SHIFT = int(200 * QUALITY_SCALE)
 
 
 # ================================================
-# СОЗДАНИЕ ХОЛСТА
+# ХОЛСТ
 # ================================================
 img = Image.new("RGB", (WIDTH, HEIGHT), BG)
 draw = ImageDraw.Draw(img)
@@ -110,12 +122,12 @@ CELL_HEIGHT = int(200 * SCALE * QUALITY_SCALE)
 GRID_WIDTH = COLS * CELL_WIDTH + (COLS - 1) * H_GAP
 GRID_HEIGHT = ROWS * CELL_HEIGHT + (ROWS - 1) * V_GAP
 
-START_X = (WIDTH - GRID_WIDTH) // 2
-START_Y = (HEIGHT - GRID_HEIGHT) // 2 + VERTICAL_SHIFT
+START_X = int((WIDTH - GRID_WIDTH) // 2)
+START_Y = int((HEIGHT - GRID_HEIGHT) // 2 + VERTICAL_SHIFT)
 
 
 # ================================================
-# ТЕКУЩАЯ ДАТА
+# ДАТА И ПРОГРЕСС
 # ================================================
 today = date.today()
 
@@ -138,33 +150,40 @@ for i, (month_name, month_num) in enumerate(months):
     col = i % COLS
     row = i // COLS
 
-    x0 = START_X + col * (CELL_WIDTH + H_GAP)
-    y0 = START_Y + row * (CELL_HEIGHT + V_GAP)
+    x0 = int(START_X + col * (CELL_WIDTH + H_GAP))
+    y0 = int(START_Y + row * (CELL_HEIGHT + V_GAP))
 
-    # Месяц
+    # Название месяца
     bbox = draw.textbbox((0, 0), month_name, font=font_month)
     title_w = bbox[2] - bbox[0]
 
     draw.text(
-        (x0 + (CELL_WIDTH - title_w) // 2, y0),
+        (int(x0 + (CELL_WIDTH - title_w) // 2), y0),
         month_name,
         fill=WHITE,
         font=font_month
     )
 
-    # Дни недели
-    wx = x0
-    wy = y0 + TITLE_HEIGHT
+    # Дни недели (ЧЁТКИЕ)
+    wx = int(x0)
+    wy = int(y0 + TITLE_HEIGHT)
 
     for idx, wd in enumerate(weekdays):
         color = RED if idx >= 5 else GRAY
-        draw.text((wx, wy), wd, fill=color, font=font_weekday)
+        draw_text_crisp(
+            draw,
+            (wx, wy),
+            wd,
+            font_weekday,
+            fill=color,
+            bg=BG
+        )
         wx += DOT_SIZE + DOT_GAP
 
     # Точки дней
     first_weekday, days_in_month = calendar.monthrange(YEAR, month_num)
-    x = x0 + first_weekday * (DOT_SIZE + DOT_GAP)
-    y = wy + WEEKDAY_HEIGHT
+    x = int(x0 + first_weekday * (DOT_SIZE + DOT_GAP))
+    y = int(wy + WEEKDAY_HEIGHT)
 
     for day in range(1, days_in_month + 1):
 
@@ -193,7 +212,7 @@ for i, (month_name, month_num) in enumerate(months):
 
         x += DOT_SIZE + DOT_GAP
         if (first_weekday + day) % 7 == 0:
-            x = x0
+            x = int(x0)
             y += DOT_SIZE + LINE_GAP
 
 
@@ -206,22 +225,17 @@ text_right = f" · {progress_percent}%"
 bbox_l = draw.textbbox((0, 0), text_left, font=font_footer)
 bbox_r = draw.textbbox((0, 0), text_right, font=font_footer)
 
-total_w = (bbox_l[2] - bbox_l[0]) + (bbox_r[2] - bbox_r[0])
+total_w = bbox_l[2] - bbox_l[0] + bbox_r[2] - bbox_r[0]
 
-fx = (WIDTH - total_w) // 2
-fy = START_Y + GRID_HEIGHT + int(48 * SCALE * QUALITY_SCALE)
+fx = int((WIDTH - total_w) // 2)
+fy = int(START_Y + GRID_HEIGHT + 48 * SCALE * QUALITY_SCALE)
 
 draw.text((fx, fy), text_left, fill=ORANGE, font=font_footer)
-draw.text(
-    (fx + (bbox_l[2] - bbox_l[0]), fy),
-    text_right,
-    fill=WHITE,
-    font=font_footer
-)
+draw.text((fx + (bbox_l[2] - bbox_l[0]), fy), text_right, fill=WHITE, font=font_footer)
 
 
 # ================================================
-# ФИНАЛЬНЫЙ DOWNSCALE + SAVE (КЛЮЧЕВОЙ МОМЕНТ)
+# ФИНАЛЬНЫЙ DOWNSCALE + SAVE
 # ================================================
 output_dir = "output"
 os.makedirs(output_dir, exist_ok=True)
