@@ -79,7 +79,7 @@ TOTAL_DAYS = 365      # для расчёта прогресса
 # ОБЩИЙ МАСШТАБ И ПОЗИЦИЯ СЕТКИ
 # =================================================
 SCALE = 1.50            # масштаб всей календарной сетки
-FOOTER_SCALE = 1.8     # дополнительный масштаб прогресса
+FOOTER_SCALE = 1.7     # дополнительный масштаб прогресса
 VERTICAL_SHIFT = int(140 * QUALITY_SCALE)  # сдвиг вниз
 
 
@@ -101,12 +101,12 @@ FONT_PATH = "fonts/Roboto-Regular.ttf"
 
 font_month = ImageFont.truetype(
     FONT_PATH,
-    int(22 * SCALE * QUALITY_SCALE)
+    int(23 * SCALE * QUALITY_SCALE)
 )
 
 font_weekday = ImageFont.truetype(
     FONT_PATH,
-    int(14 * SCALE * QUALITY_SCALE)
+    int(15 * SCALE * QUALITY_SCALE)
 )
 
 font_footer = ImageFont.truetype(
@@ -141,7 +141,7 @@ DOT_GAP = int(12 * SCALE * QUALITY_SCALE)    # расстояние между �
 LINE_GAP = int(10 * SCALE * QUALITY_SCALE)   # расстояние между неделями
 
 TITLE_HEIGHT = int(34 * SCALE * QUALITY_SCALE)    # высота заголовка месяца
-WEEKDAY_HEIGHT = int(18 * SCALE * QUALITY_SCALE)  # высота строки дней недели
+WEEKDAY_HEIGHT = int(20 * SCALE * QUALITY_SCALE)  # высота строки дней недели
 
 H_GAP = int(36 * SCALE * QUALITY_SCALE)  # горизонтальный отступ между месяцами
 V_GAP = int(44 * SCALE * QUALITY_SCALE)  # вертикальный отступ между месяцами
