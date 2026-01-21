@@ -7,6 +7,7 @@
 from datetime import date
 import calendar
 import os
+from PIL.PngImagePlugin import PngInfo
 
 # =================================================
 # Импорт PIL (Pillow) для работы с изображениями
@@ -278,6 +279,14 @@ output_dir = "output"
 os.makedirs(output_dir, exist_ok=True)
 
 output_path = os.path.join(output_dir, "wallpaper.png")
-final_img.save(output_path, optimize=False)
+
+meta = PngInfo()
+meta.add_text("generated_at", str(today))
+
+final_img.save(
+    output_path,
+    pnginfo=meta,
+    optimize=False
+)
 
 print("Готово:", output_path)
