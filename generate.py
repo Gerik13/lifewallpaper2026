@@ -260,7 +260,7 @@ total_w = bbox_l[2] - bbox_l[0] + bbox_r[2] - bbox_r[0]
 fx = int((WIDTH - total_w) // 2)
 fy = int(START_Y + GRID_HEIGHT + 48 * SCALE * QUALITY_SCALE)
 
-draw.text((fx, fy), text_left, fill=ORANGE, font=font_footer)
+draw.text((fx, fy), text_left, fill=WHITE, font=font_footer)
 draw.text((fx + (bbox_l[2] - bbox_l[0]), fy), text_right, fill=WHITE, font=font_footer)
 
 
