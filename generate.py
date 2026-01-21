@@ -249,7 +249,17 @@ for i, (month_name, month_num) in enumerate(months):
 # =================================================
 # ПРОГРЕСС ГОДА (НИЗ ЭКРАНА)
 # =================================================
-text_left = f"Осталось {remaining_days} дней"
+def plural_days(n: int) -> str:
+    if 11 <= n % 100 <= 14:
+        return "дней"
+    last = n % 10
+    if last == 1:
+        return "день"
+    if 2 <= last <= 4:
+        return "дня"
+    return "дней"
+
+text_left = f"Осталось {remaining_days} {plural_days(remaining_days)}"
 text_right = f" · {progress_percent}%"
 
 bbox_l = draw.textbbox((0, 0), text_left, font=font_footer)
