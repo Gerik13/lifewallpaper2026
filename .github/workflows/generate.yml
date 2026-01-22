@@ -1,37 +1,16 @@
-name: Generate wallpaper
+name: Cron test
 
 on:
   schedule:
-    - cron: "0 9 * * *"
-    - cron: "0 12 * * 1"   # понедельник, пинг
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Generate wallpaper
-        run: python generate.py
-
-      - name: Commit result
+      - name: Say hello
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-
-          echo "Generated at $(date -u)" > output/.timestamp
-
-          git add output/wallpaper.png output/.timestamp
-          git commit -m "Update wallpaper ($(date -u))"
-          git push
-
+          echo "CRON TEST"
+          echo "Event: $GITHUB_EVENT_NAME"
+          date
