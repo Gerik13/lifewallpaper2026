@@ -28,7 +28,10 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add output/wallpaper.png
-          git commit -m "Update wallpaper" || echo "No changes to commit"
+
+          echo "Generated at $(date -u)" > output/.timestamp
+
+          git add output/wallpaper.png output/.timestamp
+          git commit -m "Update wallpaper ($(date -u))"
           git push
 
