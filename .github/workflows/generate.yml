@@ -33,6 +33,6 @@ jobs:
 
 
           git add output/wallpaper.png output/.timestamp
-          git commit -m "Update wallpaper (Generated at $(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M:%S MSK'))"
+          git commit -m "Update wallpaper (Generated at $(TZ=Europe/Moscow date '+%d-%m-%Y %H:%M:%S MSK'))"
 
           git push
