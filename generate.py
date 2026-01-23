@@ -140,7 +140,7 @@ START_Y = int((HEIGHT - GRID_HEIGHT) // 2 + VERTICAL_SHIFT)
 # ТЕКУЩАЯ ДАТА С TZ И РАННИМ ПЕРЕКЛЮЧЕНИЕМ ДНЯ
 # =================================================
 TZ = timezone(timedelta(hours=3))  # ← поменяй при необходимости
-CUTOFF = time(23, 55)
+CUTOFF = time(23, 58)
 
 now = datetime.now(TZ)
 
