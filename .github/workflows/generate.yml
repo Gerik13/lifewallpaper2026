@@ -29,9 +29,10 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          echo "Generated at $(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M:%S MSK')" > output/.timestamp
+          echo "Generated at $(TZ=Europe/Moscow date '+%d-%m-%Y %H:%M:%S MSK')" > output/.timestamp
 
 
           git add output/wallpaper.png output/.timestamp
-          git commit -m "Update wallpaper ($(date -u))"
+          git commit -m "Update wallpaper (Generated at $(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M:%S MSK'))"
+
           git push
