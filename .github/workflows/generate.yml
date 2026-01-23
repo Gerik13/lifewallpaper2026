@@ -2,8 +2,8 @@ name: Generate wallpaper
 
 on:
   schedule:
-    - cron: "0 9 * * *"
-    - cron: "0 12 * * 1"   # понедельник, пинг
+#    - cron: "0 9 * * *"
+#    - cron: "0 12 * * 1"   # понедельник, пинг
   workflow_dispatch:
 
 jobs:
