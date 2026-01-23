@@ -1,7 +1,7 @@
 # =================================================
 # Импорт стандартных библиотек Python
 # =================================================
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 import calendar
 import os
 from PIL.PngImagePlugin import PngInfo
@@ -41,13 +41,13 @@ HEIGHT = int(FINAL_HEIGHT * QUALITY_SCALE)
 # =================================================
 # ЦВЕТОВАЯ ПАЛИТРА
 # =================================================
-
 BG = "#000000"
 WHITE = "#FFFFFF"
 GRAY = "#8A8A95"
 DARK = "#2A2D34"
 ORANGE = "#9FBF3B"
 RED = "#FF453A"
+
 
 # =================================================
 # НАСТРОЙКА КАЛЕНДАРЯ
@@ -137,14 +137,20 @@ START_Y = int((HEIGHT - GRID_HEIGHT) // 2 + VERTICAL_SHIFT)
 
 
 # =================================================
-# ТЕКУЩАЯ ДАТА (ФИКСИРОВАННЫЙ РАННИЙ СМЕНА ДНЯ)
+# ТЕКУЩАЯ ДАТА С TZ И РАННИМ ПЕРЕКЛЮЧЕНИЕМ ДНЯ
 # =================================================
-now = datetime.now()
+TZ = timezone(timedelta(hours=3))  # ← поменяй при необходимости
+CUTOFF = time(23, 55)
 
-if now.time() >= time(23, 55):
+now = datetime.now(TZ)
+
+if now.time() >= CUTOFF:
     today = (now + timedelta(days=1)).date()
 else:
     today = now.date()
+
+print("SERVER NOW:", now.isoformat())
+print("EFFECTIVE DAY:", today.isoformat())
 
 
 # =================================================
@@ -269,6 +275,7 @@ output_path = os.path.join(output_dir, "wallpaper.png")
 
 meta = PngInfo()
 meta.add_text("generated_at", now.isoformat())
+meta.add_text("effective_day", today.isoformat())
 
 final_img.save(
     output_path,
